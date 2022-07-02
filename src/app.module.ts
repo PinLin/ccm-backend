@@ -1,3 +1,4 @@
+import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -21,6 +22,15 @@ import { UserModule } from './feature/user/user.module';
         database: config.get('DB_DATABASE'),
         autoLoadEntities: true,
         synchronize: true,
+      }),
+    }),
+    RedisModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        config: {
+          host: config.get('REDIS_HOST'),
+          port: config.get('REDIS_PORT'),
+        },
       }),
     }),
     UserModule,
