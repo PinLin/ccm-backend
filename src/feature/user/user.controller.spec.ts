@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserExistedException } from './exception/user-existed.exception';
+import { UserNotExistedException } from './exception/user-not-existed.exception';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
@@ -8,6 +9,7 @@ describe('UserController', () => {
 
   const mockUserService = {
     create: jest.fn(dto => dto.username != 'someone' ? { ...dto, id: 2 } : null),
+    findOne: jest.fn(username => username == 'someone' ? { username: 'someone' } : null),
   };
 
   beforeEach(async () => {
@@ -36,5 +38,18 @@ describe('UserController', () => {
     const dto = { username: 'someone', secret: 'dontcare' };
 
     expect(controller.createUser(dto)).rejects.toThrow(UserExistedException);
+  });
+
+  it('should found a user', async () => {
+    const username = 'someone';
+
+    const user = await controller.findUser(username);
+    expect(user.username).toBe(username);
+  });
+
+  it('should throw an error when finding a not-existed user', async () => {
+    const username = 'not_existed';
+
+    expect(controller.findUser(username)).rejects.toThrow(UserNotExistedException);
   });
 });
