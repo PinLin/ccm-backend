@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post, Session } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Session, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { LoginFailedException } from './exception/login-failed.exception';
 import { SessionSaltNotExistedException } from './exception/session-salt-not-existed.exception';
+import { LoginGuard } from './guard/login.guard';
 import { ReqSession } from './types/request-session';
 
 @Controller('session')
@@ -40,5 +41,13 @@ export class AuthController {
                 avatar: user.avatar,
             },
         };
+    }
+
+    @Delete()
+    @UseGuards(LoginGuard)
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async logout(@Session() sess: ReqSession) {
+        sess.username = undefined;
+        sess.loggedIn = false;
     }
 }

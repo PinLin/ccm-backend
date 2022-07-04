@@ -54,4 +54,13 @@ describe('AuthController', () => {
 
     expect(controller.login(sess, payload)).rejects.toThrow(SessionSaltNotExistedException);
   });
+
+  it('should logout successfully', async () => {
+    const sess = { salt: 'salt', username: 'someone', loggedIn: true };
+
+    expect(controller.logout(sess)).resolves.not.toThrow();
+    expect(sess.salt).toBe('salt');
+    expect(sess.username).toBeUndefined();
+    expect(sess.loggedIn).toBeFalsy();
+  });
 });
