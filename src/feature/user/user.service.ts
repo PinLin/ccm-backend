@@ -27,4 +27,8 @@ export class UserService {
         });
         return this.userRepository.save(newUser);
     }
+
+    async findOne(username: string) {
+        return this.userRepository.findOneBy({ username });
+    }
 }

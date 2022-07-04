@@ -52,4 +52,18 @@ describe('UserService', () => {
     const user = await service.create(dto);
     expect(user).toBeNull();
   });
+
+  it('should find the user by username', async () => {
+    const username = 'someone';
+
+    const user = await service.findOne(username);
+    expect(user.username).toBe(username);
+  });
+
+  it('should return null when finding a existed user', async () => {
+    const username = 'not_existed';
+
+    const user = await service.findOne(username);
+    expect(user).toBeNull();
+  });
 });

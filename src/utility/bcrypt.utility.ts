@@ -8,4 +8,8 @@ export class Bcrypt {
     static verify(hash: string, password: string) {
         return bcrypt.compare(password, hash);
     }
+
+    static generateSalt() {
+        return bcrypt.genSalt(10);
+    }
 }
