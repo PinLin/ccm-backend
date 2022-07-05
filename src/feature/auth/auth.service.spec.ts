@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
@@ -17,11 +18,15 @@ describe('AuthService', () => {
         else return null;
       }),
     };
+    const mockConfigService = {
+      get: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: UserService, useValue: mockUserService },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
