@@ -66,4 +66,11 @@ describe('UserService', () => {
     const user = await service.findOne(username);
     expect(user).toBeNull();
   });
+
+  it('should delete the specific user', async () => {
+    const username = 'someone';
+
+    const result = await service.delete(username);
+    expect(result).toBeTruthy();
+  });
 });

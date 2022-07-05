@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Session, UseGuards } from '@nestjs/common';
+import { LoginGuard } from '../auth/guards/login.guard';
+import { ReqSession } from '../auth/types/request-session';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserExistedException } from './exception/user-existed.exception';
 import { UserNotExistedException } from './exception/user-not-existed.exception';
@@ -26,5 +28,16 @@ export class UserController {
 
         const { id, password, ...otherUserData } = user;
         return otherUserData;
+    }
+
+    @Delete('me')
+    @UseGuards(LoginGuard)
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async deleteMe(@Session() sess: ReqSession) {
+        const { username } = sess;
+        await this.userService.delete(username);
+
+        sess.username = undefined;
+        sess.loggedIn = false;
     }
 }

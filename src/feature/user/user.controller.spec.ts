@@ -10,6 +10,7 @@ describe('UserController', () => {
   const mockUserService = {
     create: jest.fn(dto => dto.username != 'someone' ? { ...dto, id: 2 } : null),
     findOne: jest.fn(username => username == 'someone' ? { username: 'someone' } : null),
+    delete: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -51,5 +52,11 @@ describe('UserController', () => {
     const username = 'not_existed';
 
     expect(controller.findUser(username)).rejects.toThrow(UserNotExistedException);
+  });
+
+  it('should delete a specific user', async () => {
+    const sess = { salt: 'salt', username: 'someone', loggedIn: true };
+
+    expect(controller.deleteMe(sess)).resolves.not.toThrow();
   });
 });
