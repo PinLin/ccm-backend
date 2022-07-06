@@ -4,6 +4,9 @@ import { Bcrypt } from '../../utility/bcrypt.utility';
 import { Repository } from 'typeorm';
 import { User } from '../../entity/user.entity';
 import { UserService } from './user.service';
+import { SHA256 } from '../../utility/sha256.utility';
+import { AES } from '../../utility/aes.utility';
+import { Ecies } from '../../utility/ecies.utility';
 
 describe('UserService', () => {
   let service: UserService;
@@ -31,6 +34,8 @@ describe('UserService', () => {
       password: 'dontcare',
       nickname: 'dontcare',
       avatar: 'dontcare',
+      publicKey: 'dontcare',
+      encryptedPrivateKey: 'dontcare',
     }));
   });
 
@@ -44,6 +49,13 @@ describe('UserService', () => {
     const user = await service.create(dto);
     expect(user.username).toBe(dto.username);
     expect(await Bcrypt.verify(user.password, dto.secret)).toBeTruthy();
+    const publicKey = user.publicKey;
+    const plaintext = 'test';
+    const ciphertext = await Ecies.encrypt(publicKey, plaintext)
+    const aesKey = SHA256.hash(dto.secret).slice(0, 32);
+    const aesIv = SHA256.hash(dto.username).slice(0, 16);
+    const privateKey = AES.decrypt(user.encryptedPrivateKey, aesKey, aesIv);
+    expect(await Ecies.decrypt(privateKey, ciphertext)).toBe(plaintext);
   });
 
   it('should return null when creating a existed user', async () => {

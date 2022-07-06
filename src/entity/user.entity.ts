@@ -16,4 +16,10 @@ export class User {
 
     @Column()
     avatar: string;
+
+    @Column()
+    publicKey: string;
+
+    @Column()
+    encryptedPrivateKey: string;
 }

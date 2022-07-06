@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Session, UseGuards } from '@nestjs/common';
-import { LoginGuard } from '../auth/guards/login.guard';
+import { LoginGuard } from '../auth/guard/login.guard';
 import { ReqSession } from '../auth/types/request-session';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserExistedException } from './exception/user-existed.exception';
@@ -17,8 +17,8 @@ export class UserController {
         const user = await this.userService.create(payload);
         if (!user) throw new UserExistedException();
 
-        const { id, password, ...otherUserData } = user;
-        return otherUserData;
+        const { username, nickname, avatar } = user;
+        return { username, nickname, avatar };
     }
 
     @Get(':username')
@@ -26,8 +26,8 @@ export class UserController {
         const user = await this.userService.findOne(username);
         if (!user) throw new UserNotExistedException();
 
-        const { id, password, ...otherUserData } = user;
-        return otherUserData;
+        const { nickname, avatar, publicKey } = user;
+        return { username, nickname, avatar, publicKey };
     }
 
     @Delete('me')

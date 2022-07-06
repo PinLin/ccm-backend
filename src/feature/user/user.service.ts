@@ -5,6 +5,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { Bcrypt } from '../../utility/bcrypt.utility';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SHA256 } from '../../utility/sha256.utility';
+import { Ecies } from '../../utility/ecies.utility';
+import { AES } from '../../utility/aes.utility';
 
 @Injectable()
 export class UserService {
@@ -20,10 +22,16 @@ export class UserService {
 
         const password = await Bcrypt.hash(secret, `$2b$10$${SHA256.hash(username).slice(0, 22)}`);
 
+        const { publicKey, privateKey } = Ecies.generateKeyPair();
+        const aesKey = SHA256.hash(secret).slice(0, 32);
+        const aesIv = SHA256.hash(username).slice(0, 16);
+        const encryptedPrivateKey = AES.encrypt(privateKey, aesKey, aesIv);
+
         const newUser = this.userRepository.create({
             username, password,
             nickname: username,
             avatar: 'https://imgur.com/Kf3m1o7.png',
+            publicKey, encryptedPrivateKey,
         });
         return this.userRepository.save(newUser);
     }

@@ -40,6 +40,7 @@ export class AuthController {
                 nickname: user.nickname,
                 avatar: user.avatar,
             },
+            privateKey: user.encryptedPrivateKey,
         };
     }
 
