@@ -30,12 +30,30 @@ describe('ChatController', () => {
       };
       return null;
     }),
+    findAllChats: jest.fn((userId) => {
+      if (userId == 1 || userId == 2) return [
+        {
+          id: 1,
+          members: [
+            { userId: 1, encryptedMessageKey: 'encryptedMessageKey' },
+            { userId: 2, encryptedMessageKey: 'encryptedMessageKey' },
+          ],
+        },
+      ];
+      return [];
+    }),
   };
   const mockUserService = {
     findOneByUsername: jest.fn(username => {
       if (username == 'user1') return { id: 1, username: 'user1' };
       if (username == 'user2') return { id: 2, username: 'user2' };
       if (username == 'user3') return { id: 3, username: 'user3' };
+      return null;
+    }),
+    findOne: jest.fn(id => {
+      if (id == 1) return { id: 1, username: 'user1' };
+      if (id == 2) return { id: 2, username: 'user2' };
+      if (id == 3) return { id: 3, username: 'user3' };
       return null;
     }),
   };
@@ -105,5 +123,19 @@ describe('ChatController', () => {
     const username = 'user4';
 
     expect(controller.findChat(sess, username)).rejects.toThrow(UserNotExistedException);
+  });
+
+  it('should find all one chat', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+
+    const { rooms } = await controller.findAllChats(sess);
+    expect(rooms).toHaveLength(1);
+  });
+
+  it('should find all zero chats', async () => {
+    const sess = { salt: 'salt', username: 'user3', loggedIn: true };
+
+    const { rooms } = await controller.findAllChats(sess);
+    expect(rooms).toHaveLength(0);
   });
 });

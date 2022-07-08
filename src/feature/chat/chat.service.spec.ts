@@ -98,4 +98,14 @@ describe('ChatService', () => {
     const chat = await service.findChatByUserIds(user1.id, user1.id);
     expect(chat).toBeNull();
   });
+
+  it('should return an array of chats', async () => {
+    const chats = await service.findAllChats(user1.id);
+    expect(chats).toHaveLength(1);
+  });
+
+  it('should return an empty array of chats', async () => {
+    const chats = await service.findAllChats(user3.id);
+    expect(chats).toHaveLength(0);
+  });
 });

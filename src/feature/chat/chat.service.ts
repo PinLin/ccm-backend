@@ -46,4 +46,12 @@ export class ChatService {
             relations: ['members'],
         })
     }
+
+    async findAllChats(userId: number) {
+        const membersOfEachChat = await this.chatMemberRepository.find({
+            where: { userId },
+            relations: ['chat.members'],
+        });
+        return membersOfEachChat.map(member => member.chat);
+    }
 }

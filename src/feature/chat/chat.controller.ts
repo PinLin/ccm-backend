@@ -52,4 +52,25 @@ export class ChatController {
                 chat.members[1].encryptedMessageKey,
         };
     }
+
+    @Get()
+    @UseGuards(LoginGuard)
+    async findAllChats(@Session() sess: ReqSession) {
+        const user = await this.userService.findOneByUsername(sess.username);
+        const chats = await this.chatService.findAllChats(user.id);
+        // For compatibility with legacy APIs
+        return {
+            rooms: await Promise.all(chats.map(async chat => {
+                const userId2 = chat.members[0].userId != user.id ?
+                    chat.members[0].userId :
+                    chat.members[1].userId;
+                const user2 = await this.userService.findOne(userId2);
+                return {
+                    username: user2.username,
+                    nickname: user2.nickname,
+                    avatar: user2.avatar,
+                };
+            })),
+        };
+    }
 }
