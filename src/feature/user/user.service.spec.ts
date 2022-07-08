@@ -65,24 +65,38 @@ describe('UserService', () => {
     expect(user).toBeNull();
   });
 
-  it('should find the user by username', async () => {
+  it('should return the user-id by username', async () => {
     const username = 'someone';
 
-    const user = await service.findOne(username);
-    expect(user.username).toBe(username);
+    const user = await service.findOneByUsername(username);
+    expect(user.id).toBe(1);
+  });
+
+  it('should return null by non-existed username', async () => {
+    const username = 'not_existed';
+
+    const user = await service.findOneByUsername(username);
+    expect(user).toBeNull();
+  });
+
+  it('should find the user', async () => {
+    const id = 1;
+
+    const user = await service.findOne(id);
+    expect(user.username).toBe('someone');
   });
 
   it('should return null when finding a existed user', async () => {
-    const username = 'not_existed';
+    const id = 2;
 
-    const user = await service.findOne(username);
+    const user = await service.findOne(id);
     expect(user).toBeNull();
   });
 
   it('should delete the specific user', async () => {
-    const username = 'someone';
+    const id = 1;
 
-    const result = await service.delete(username);
+    const result = await service.delete(id);
     expect(result).toBeTruthy();
   });
 });

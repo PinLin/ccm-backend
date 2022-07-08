@@ -36,12 +36,16 @@ export class UserService {
         return this.userRepository.save(newUser);
     }
 
-    async findOne(username: string) {
+    async findOne(id: number) {
+        return this.userRepository.findOneBy({ id });
+    }
+
+    async findOneByUsername(username: string) {
         return this.userRepository.findOneBy({ username });
     }
 
-    async delete(username: string) {
-        const user = await this.userRepository.findOneBy({ username });
+    async delete(id: number) {
+        const user = await this.userRepository.findOneBy({ id });
         return this.userRepository.remove(user);
     }
 }

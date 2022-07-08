@@ -13,7 +13,7 @@ describe('AuthService', () => {
       password: '$2b$10$2a59d59e3809f827ce709Ockb8z9svfUE5VJRMogvGD8vE9Y/dssW',
     };
     const mockUserService = {
-      findOne: jest.fn(username => {
+      findOneByUsername: jest.fn(username => {
         if (username == 'someone') return mockUser;
         else return null;
       }),

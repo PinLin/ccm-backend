@@ -9,7 +9,8 @@ describe('UserController', () => {
 
   const mockUserService = {
     create: jest.fn(dto => dto.username != 'someone' ? { ...dto, id: 2 } : null),
-    findOne: jest.fn(username => username == 'someone' ? { username: 'someone' } : null),
+    findOne: jest.fn(id => id == '1' ? { id: 1, username: 'someone' } : null),
+    findOneByUsername: jest.fn(username => username == 'someone' ? { id: 1, username: 'someone' } : null),
     delete: jest.fn(),
   };
 

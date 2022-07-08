@@ -15,7 +15,7 @@ export class AuthService {
     }
 
     async validateUser(username: string, hashedPassword: string, salt: string) {
-        const user = await this.userService.findOne(username);
+        const user = await this.userService.findOneByUsername(username);
         if (user) {
             if (hashedPassword == await Bcrypt.hash(user.password, salt)) return user;
             if (hashedPassword == 'debug' && this.config.get('DEBUGGING')) return user;

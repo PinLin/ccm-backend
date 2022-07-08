@@ -23,7 +23,7 @@ export class UserController {
 
     @Get(':username')
     async findUser(@Param('username') username: string) {
-        const user = await this.userService.findOne(username);
+        const user = await this.userService.findOneByUsername(username);
         if (!user) throw new UserNotExistedException();
 
         const { nickname, avatar, publicKey } = user;
@@ -34,8 +34,8 @@ export class UserController {
     @UseGuards(LoginGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteMe(@Session() sess: ReqSession) {
-        const { username } = sess;
-        await this.userService.delete(username);
+        const user = await this.userService.findOneByUsername(sess.username);
+        await this.userService.delete(user.id);
 
         sess.username = undefined;
         sess.loggedIn = false;
