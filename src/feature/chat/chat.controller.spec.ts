@@ -4,6 +4,7 @@ import { UserService } from '../user/user.service';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { ChatExistedException } from './exception/chat-existed.exception';
+import { ChatNotExistedException } from './exception/chat-not-existed.exception';
 import { CreateSelfChatException } from './exception/create-self-chat.exception';
 
 describe('ChatController', () => {
@@ -82,5 +83,27 @@ describe('ChatController', () => {
     const payload = { username: 'user2' };
 
     expect(controller.createChat(sess, payload)).rejects.toThrow(ChatExistedException);
+  });
+
+  it('should find a chat', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+    const username = 'user2';
+
+    const { messageKey } = await controller.findChat(sess, username);
+    expect(messageKey).toBe('encryptedMessageKey');
+  });
+
+  it('should throw an error when finding a non-existed chat', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+    const username = 'user3';
+
+    expect(controller.findChat(sess, username)).rejects.toThrow(ChatNotExistedException);
+  });
+
+  it('should throw an error when finding a chat with a non-existed user', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+    const username = 'user4';
+
+    expect(controller.findChat(sess, username)).rejects.toThrow(UserNotExistedException);
   });
 });

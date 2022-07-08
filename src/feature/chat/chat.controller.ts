@@ -6,6 +6,7 @@ import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { ChatExistedException } from './exception/chat-existed.exception';
+import { ChatNotExistedException } from './exception/chat-not-existed.exception';
 import { CreateSelfChatException } from './exception/create-self-chat.exception';
 
 @Controller('chat')
@@ -30,6 +31,23 @@ export class ChatController {
         // For compatibility with legacy APIs
         return {
             messageKey: chat.members[0].userId == owner.id ?
+                chat.members[0].encryptedMessageKey :
+                chat.members[1].encryptedMessageKey,
+        };
+    }
+
+    @Get(':username')
+    @UseGuards(LoginGuard)
+    async findChat(@Session() sess: ReqSession, @Param('username') username2: string) {
+        const user1 = await this.userService.findOneByUsername(sess.username);
+        const user2 = await this.userService.findOneByUsername(username2);
+        if (!user2) throw new UserNotExistedException();
+
+        const chat = await this.chatService.findChatByUserIds(user1.id, user2.id);
+        if (!chat) throw new ChatNotExistedException();
+        // For compatibility with legacy APIs
+        return {
+            messageKey: chat.members[0].userId == user1.id ?
                 chat.members[0].encryptedMessageKey :
                 chat.members[1].encryptedMessageKey,
         };
