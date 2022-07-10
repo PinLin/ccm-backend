@@ -3,6 +3,7 @@ import { UserNotExistedException } from '../user/exception/user-not-existed.exce
 import { UserService } from '../user/user.service';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
+import { MessageType } from './enum/message.enum';
 import { ChatExistedException } from './exception/chat-existed.exception';
 import { ChatNotExistedException } from './exception/chat-not-existed.exception';
 import { CreateSelfChatException } from './exception/create-self-chat.exception';
@@ -42,6 +43,7 @@ describe('ChatController', () => {
       ];
       return [];
     }),
+    sendMessage: jest.fn((_, senderId, payload) => ({ ...payload, senderId, })),
   };
   const mockUserService = {
     findOneByUsername: jest.fn(username => {
@@ -137,5 +139,24 @@ describe('ChatController', () => {
 
     const { rooms } = await controller.findAllChats(sess);
     expect(rooms).toHaveLength(0);
+  });
+
+  it('should send a message', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+    const receiverUsername = 'user2';
+    const payload = { type: MessageType.Text, content: 'test' };
+
+    const result = await controller.sendMessage(sess, receiverUsername, payload);
+    expect(result.sender).toBe('user1');
+    expect(result.type).toBe(payload.type);
+    expect(result.content).toBe(payload.content);
+  });
+
+  it('should throw an error when sending messages to non-existed chat', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+    const receiverUsername = 'user3';
+    const payload = { type: MessageType.Text, content: 'test' };
+
+    expect(controller.sendMessage(sess, receiverUsername, payload)).rejects.toThrow(ChatNotExistedException);
   });
 });

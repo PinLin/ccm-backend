@@ -5,6 +5,8 @@ import { ChatMember } from '../../entity/chat-member.entity';
 import { Chat } from '../../entity/chat.entity';
 import * as crypto from 'crypto';
 import { Ecies } from '../../utility/ecies.utility';
+import { Message } from '../../entity/message.entity';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @Injectable()
 export class ChatService {
@@ -13,6 +15,8 @@ export class ChatService {
         private readonly chatRepository: Repository<Chat>,
         @InjectRepository(ChatMember)
         private readonly chatMemberRepository: Repository<ChatMember>,
+        @InjectRepository(Message)
+        private readonly messageRepository: Repository<Message>,
     ) { }
 
     async createChat(ownerId: number, ownerPublicKey: string, guestId: number, guestPublicKey: string) {
@@ -53,5 +57,10 @@ export class ChatService {
             relations: ['chat.members'],
         });
         return membersOfEachChat.map(member => member.chat);
+    }
+
+    async sendMessage(chatId: number, senderId: number, payload: SendMessageDto) {
+        const message = this.messageRepository.create({ chatId, senderId, ...payload });
+        return this.messageRepository.save(message);
     }
 }

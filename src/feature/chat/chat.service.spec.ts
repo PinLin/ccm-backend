@@ -3,18 +3,22 @@ import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChatMember } from '../../entity/chat-member.entity';
 import { Chat } from '../../entity/chat.entity';
+import { Message } from '../../entity/message.entity';
 import { User } from '../../entity/user.entity';
 import { ChatService } from './chat.service';
+import { MessageType } from './enum/message.enum';
 
 describe('ChatService', () => {
   let service: ChatService;
   let userRepository: Repository<User>;
   let chatRepository: Repository<Chat>;
   let chatMemberRepository: Repository<ChatMember>;
+  let messageRepository: Repository<Message>;
 
   let user1: User;
   let user2: User;
   let user3: User;
+  let chat1: Chat;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,7 +29,7 @@ describe('ChatService', () => {
           autoLoadEntities: true,
           synchronize: true,
         }),
-        TypeOrmModule.forFeature([Chat, ChatMember, User]),
+        TypeOrmModule.forFeature([Chat, ChatMember, User, Message]),
       ],
       providers: [ChatService],
     }).compile();
@@ -61,8 +65,8 @@ describe('ChatService', () => {
 
     chatRepository = module.get<Repository<Chat>>(getRepositoryToken(Chat));
     chatMemberRepository = module.get<Repository<ChatMember>>(getRepositoryToken(ChatMember));
-    const chat = chatRepository.create();
-    chat.members = [
+    chat1 = chatRepository.create();
+    chat1.members = [
       chatMemberRepository.create({
         userId: user1.id,
         encryptedMessageKey: 'dontcare',
@@ -72,7 +76,7 @@ describe('ChatService', () => {
         encryptedMessageKey: 'dontcare',
       }),
     ];
-    await chatRepository.save(chat);
+    await chatRepository.save(chat1);
   });
 
   it('should be defined', () => {
@@ -107,5 +111,13 @@ describe('ChatService', () => {
   it('should return an empty array of chats', async () => {
     const chats = await service.findAllChats(user3.id);
     expect(chats).toHaveLength(0);
+  });
+
+  it('should send a message', async () => {
+    const payload = { type: MessageType.Text, content: 'test' };
+
+    const message = await service.sendMessage(chat1.id, user1.id, payload);
+    expect(message.type).toBe(payload.type);
+    expect(message.content).toBe(payload.content);
   });
 });

@@ -5,6 +5,7 @@ import { UserNotExistedException } from '../user/exception/user-not-existed.exce
 import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 import { ChatExistedException } from './exception/chat-existed.exception';
 import { ChatNotExistedException } from './exception/chat-not-existed.exception';
 import { CreateSelfChatException } from './exception/create-self-chat.exception';
@@ -71,6 +72,28 @@ export class ChatController {
                     avatar: user2.avatar,
                 };
             })),
+        };
+    }
+
+    @Post(':username/message')
+    @UseGuards(LoginGuard)
+    async sendMessage(
+        @Session() sess: ReqSession,
+        @Param('username') receiverUsername: string,
+        @Body() payload: SendMessageDto,
+    ) {
+        const sender = await this.userService.findOneByUsername(sess.username);
+        const receiver = await this.userService.findOneByUsername(receiverUsername);
+        const chat = await this.chatService.findChatByUserIds(sender.id, receiver.id);
+        if (!chat) throw new ChatNotExistedException();
+
+        const message = await this.chatService.sendMessage(chat.id, sender.id, payload);
+        // For compatibility with legacy APIs
+        return {
+            sender: sender.username,
+            type: message.type,
+            content: message.content,
+            timestamp: message.timestamp,
         };
     }
 }
