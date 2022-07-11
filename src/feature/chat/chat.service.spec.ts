@@ -77,6 +77,14 @@ describe('ChatService', () => {
       }),
     ];
     await chatRepository.save(chat1);
+
+    messageRepository = module.get<Repository<Message>>(getRepositoryToken(Message));
+    await messageRepository.save(messageRepository.create({
+      chatId: chat1.id,
+      senderId: user1.id,
+      type: MessageType.Text,
+      content: 'test',
+    }));
   });
 
   it('should be defined', () => {
@@ -119,5 +127,10 @@ describe('ChatService', () => {
     const message = await service.sendMessage(chat1.id, user1.id, payload);
     expect(message.type).toBe(payload.type);
     expect(message.content).toBe(payload.content);
+  });
+
+  it('should return messages in the sprcific chat', async () => {
+    const messages = await service.getManyMessages(chat1.id, 1, 0);
+    expect(messages).toHaveLength(1);
   });
 });

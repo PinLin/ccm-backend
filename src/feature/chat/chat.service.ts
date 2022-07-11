@@ -63,4 +63,12 @@ export class ChatService {
         const message = this.messageRepository.create({ chatId, senderId, ...payload });
         return this.messageRepository.save(message);
     }
+
+    async getManyMessages(chatId: number, take: number, skip: number) {
+        return this.messageRepository.find({
+            where: { chatId },
+            order: { timestamp: 'DESC' },
+            take, skip,
+        });
+    }
 }

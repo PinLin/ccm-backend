@@ -44,6 +44,16 @@ describe('ChatController', () => {
       return [];
     }),
     sendMessage: jest.fn((_, senderId, payload) => ({ ...payload, senderId, })),
+    getManyMessages: jest.fn((chatId) => {
+      if (chatId == 1) return [
+        {
+          senderId: 1,
+          type: MessageType.Text,
+          content: 'test',
+        },
+      ];
+      return [];
+    }),
   };
   const mockUserService = {
     findOneByUsername: jest.fn(username => {
@@ -158,5 +168,22 @@ describe('ChatController', () => {
     const payload = { type: MessageType.Text, content: 'test' };
 
     expect(controller.sendMessage(sess, receiverUsername, payload)).rejects.toThrow(ChatNotExistedException);
+  });
+
+  it('should get messages in the specific chat', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+    const username = 'user2';
+    const filter = {};
+
+    const { messages } = await controller.getManyMessages(sess, username, filter);
+    expect(messages).toHaveLength(1);
+  });
+
+  it('should throw an error when getting messages in a non-existed chat', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+    const username = 'user3';
+    const filter = {};
+
+    expect(controller.getManyMessages(sess, username, filter)).rejects.toThrow(ChatNotExistedException);
   });
 });

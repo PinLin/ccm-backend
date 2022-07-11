@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Post, Session, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Session, UseGuards } from '@nestjs/common';
 import { LoginGuard } from '../auth/guard/login.guard';
 import { ReqSession } from '../auth/types/request-session';
 import { UserNotExistedException } from '../user/exception/user-not-existed.exception';
 import { UserService } from '../user/user.service';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
+import { GetMessagesDto } from './dto/get-messages.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatExistedException } from './exception/chat-existed.exception';
 import { ChatNotExistedException } from './exception/chat-not-existed.exception';
@@ -94,6 +95,35 @@ export class ChatController {
             type: message.type,
             content: message.content,
             timestamp: message.timestamp,
+        };
+    }
+
+    @Get(':username/message')
+    @UseGuards(LoginGuard)
+    async getManyMessages(
+        @Session() sess: ReqSession,
+        @Param('username') username2: string,
+        @Query() filter: GetMessagesDto,
+    ) {
+        const user1 = await this.userService.findOneByUsername(sess.username);
+        const user2 = await this.userService.findOneByUsername(username2);
+        const chat = await this.chatService.findChatByUserIds(user1.id, user2.id);
+        if (!chat) throw new ChatNotExistedException();
+
+        const take = filter.take ?? filter.count ?? 1;
+        const skip = filter.skip ?? 0;
+        const messages = await this.chatService.getManyMessages(chat.id, take, skip);
+        // For compatibility with legacy APIs
+        return {
+            messages: (await Promise.all(messages.map(async message => {
+                const senderUsername = message.senderId == user1.id ? user1.username : user2.username;
+                return {
+                    sender: senderUsername,
+                    type: message.type,
+                    content: message.content,
+                    timestamp: message.timestamp,
+                };
+            }))).reverse(),
         };
     }
 }
