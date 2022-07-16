@@ -9,6 +9,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './feature/user/user.module';
 import { AuthModule } from './feature/auth/auth.module';
+import { ChatModule } from './feature/chat/chat.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { AuthModule } from './feature/auth/auth.module';
     }),
     UserModule,
     AuthModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [
