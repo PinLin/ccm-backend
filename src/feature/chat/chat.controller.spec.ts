@@ -7,6 +7,7 @@ import { MessageType } from './enum/message.enum';
 import { ChatExistedException } from './exception/chat-existed.exception';
 import { ChatNotExistedException } from './exception/chat-not-existed.exception';
 import { CreateSelfChatException } from './exception/create-self-chat.exception';
+import { MessageNotExistedException } from './exception/message-not-existed.exception';
 
 describe('ChatController', () => {
   let controller: ChatController;
@@ -54,6 +55,14 @@ describe('ChatController', () => {
       ];
       return [];
     }),
+    getMessage: jest.fn((chatId, messageId) => {
+      if (chatId == 1 && messageId == 1) return {
+        senderId: 1,
+        type: MessageType.Text,
+        content: 'test',
+      };
+      return null;
+    })
   };
   const mockUserService = {
     findOneByUsername: jest.fn(username => {
@@ -185,5 +194,32 @@ describe('ChatController', () => {
     const filter = {};
 
     expect(controller.getManyMessages(sess, username, filter)).rejects.toThrow(ChatNotExistedException);
+  });
+
+  it('should get the message in the specific chat', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+    const username = 'user2';
+    const messageId = 1;
+
+    const message = await controller.getMessage(sess, username, messageId);
+    expect(message.sender).toBe('user1');
+    expect(message.type).toBe(MessageType.Text);
+    expect(message.content).toBe('test');
+  });
+
+  it('should throw an error when getting messages in a non-existed chat', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+    const username = 'user3';
+    const messageId = 1;
+
+    expect(controller.getMessage(sess, username, messageId)).rejects.toThrow(ChatNotExistedException);
+  });
+
+  it('should throw an error when getting a non-existed message', async () => {
+    const sess = { salt: 'salt', username: 'user1', loggedIn: true };
+    const username = 'user2';
+    const messageId = 2;
+
+    expect(controller.getMessage(sess, username, messageId)).rejects.toThrow(MessageNotExistedException);
   });
 });

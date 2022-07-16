@@ -10,6 +10,7 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { ChatExistedException } from './exception/chat-existed.exception';
 import { ChatNotExistedException } from './exception/chat-not-existed.exception';
 import { CreateSelfChatException } from './exception/create-self-chat.exception';
+import { MessageNotExistedException } from './exception/message-not-existed.exception';
 
 @Controller('chat')
 export class ChatController {
@@ -124,6 +125,31 @@ export class ChatController {
                     timestamp: message.timestamp,
                 };
             }))).reverse(),
+        };
+    }
+
+    @Get(':username/message/:messageId')
+    @UseGuards(LoginGuard)
+    async getMessage(
+        @Session() sess: ReqSession,
+        @Param('username') username2: string,
+        @Param('messageId') messageId: number,
+    ) {
+        const user1 = await this.userService.findOneByUsername(sess.username);
+        const user2 = await this.userService.findOneByUsername(username2);
+        const chat = await this.chatService.findChatByUserIds(user1.id, user2.id);
+        if (!chat) throw new ChatNotExistedException();
+
+        const message = await this.chatService.getMessage(chat.id, messageId);
+        if (!message) throw new MessageNotExistedException();
+
+        // For compatibility with legacy APIs
+        const senderUsername = message.senderId == user1.id ? user1.username : user2.username;
+        return {
+            sender: senderUsername,
+            type: message.type,
+            content: message.content,
+            timestamp: message.timestamp,
         };
     }
 }

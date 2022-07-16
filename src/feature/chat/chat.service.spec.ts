@@ -133,4 +133,11 @@ describe('ChatService', () => {
     const messages = await service.getManyMessages(chat1.id, 1, 0);
     expect(messages).toHaveLength(1);
   });
+
+  it('should return a message in the sprcific chat', async () => {
+    const message = await service.getMessage(chat1.id, 1);
+    expect(message.senderId).toBe(user1.id);
+    expect(message.type).toBe(MessageType.Text);
+    expect(message.content).toBe('test');
+  });
 });

@@ -71,4 +71,10 @@ export class ChatService {
             take, skip,
         });
     }
+
+    async getMessage(chatId: number, messageId: number) {
+        return this.messageRepository.findOne({
+            where: { chatId, id: messageId },
+        });
+    }
 }
