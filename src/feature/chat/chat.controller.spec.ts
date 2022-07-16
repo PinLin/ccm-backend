@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventGateway } from '../event/event.gateway';
 import { UserNotExistedException } from '../user/exception/user-not-existed.exception';
 import { UserService } from '../user/user.service';
 import { ChatController } from './chat.controller';
@@ -78,12 +79,16 @@ describe('ChatController', () => {
       return null;
     }),
   };
+  const mockEventGateway = {
+    notifyNewMessage: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         { provide: ChatService, useValue: mockChatService },
         { provide: UserService, useValue: mockUserService },
+        { provide: EventGateway, useValue: mockEventGateway },
       ],
       controllers: [ChatController],
     }).compile();

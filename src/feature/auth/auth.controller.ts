@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Session, UseGuards } from '@nestjs/common';
+import { EventGateway } from '../event/event.gateway';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { LoginFailedException } from './exception/login-failed.exception';
@@ -10,6 +11,7 @@ import { ReqSession } from './types/request-session';
 export class AuthController {
     constructor(
         private readonly authService: AuthService,
+        private readonly eventGateway: EventGateway,
     ) { }
 
     @Get()
@@ -48,6 +50,7 @@ export class AuthController {
     @UseGuards(LoginGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     async logout(@Session() sess: ReqSession) {
+        if (sess.socketioId) this.eventGateway.disconnect(sess.socketioId);
         sess.username = undefined;
         sess.loggedIn = false;
     }

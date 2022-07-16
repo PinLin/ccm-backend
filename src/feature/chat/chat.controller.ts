@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query, Session, UseGuards } from '@nestjs/common';
+import { EventGateway } from '../event/event.gateway';
 import { LoginGuard } from '../auth/guard/login.guard';
 import { ReqSession } from '../auth/types/request-session';
 import { UserNotExistedException } from '../user/exception/user-not-existed.exception';
@@ -17,6 +18,7 @@ export class ChatController {
     constructor(
         private readonly chatService: ChatService,
         private readonly userService: UserService,
+        private readonly eventGateway: EventGateway,
     ) { }
 
     @Post()
@@ -90,6 +92,7 @@ export class ChatController {
         if (!chat) throw new ChatNotExistedException();
 
         const message = await this.chatService.sendMessage(chat.id, sender.id, payload);
+        this.eventGateway.notifyNewMessage(sender.username, receiver.username, message.id);
         // For compatibility with legacy APIs
         return {
             sender: sender.username,

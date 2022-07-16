@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventGateway } from '../event/event.gateway';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LoginFailedException } from './exception/login-failed.exception';
@@ -15,11 +16,15 @@ describe('AuthController', () => {
       }),
       generateSessionSalt: jest.fn(() => 'new_salt'),
     };
+    const mockEventGateway = {
+      disconnect: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
+        { provide: EventGateway, useValue: mockEventGateway },
       ],
     }).compile();
 

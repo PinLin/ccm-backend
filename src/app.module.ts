@@ -2,14 +2,13 @@ import { RedisModule, RedisService } from '@liaoliaots/nestjs-redis';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SessionModule } from 'nestjs-session';
-import * as ConnectRedis from 'connect-redis';
-import * as session from 'express-session';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './feature/user/user.module';
 import { AuthModule } from './feature/auth/auth.module';
 import { ChatModule } from './feature/chat/chat.module';
+import { EventGateway } from './feature/event/event.gateway';
+import { EventModule } from './feature/event/event.module';
 
 @Module({
   imports: [
@@ -38,23 +37,10 @@ import { ChatModule } from './feature/chat/chat.module';
         },
       }),
     }),
-    SessionModule.forRootAsync({
-      inject: [ConfigService, RedisService],
-      useFactory: (config: ConfigService, redis: RedisService) => {
-        const RedisStore = ConnectRedis(session);
-        return {
-          session: {
-            store: new RedisStore({ client: redis.getClient() }),
-            secret: config.get('SESSION_SECRET'),
-            resave: false,
-            saveUninitialized: false,
-          },
-        };
-      },
-    }),
     UserModule,
     AuthModule,
     ChatModule,
+    EventModule,
   ],
   controllers: [AppController],
   providers: [
