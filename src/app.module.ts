@@ -1,4 +1,4 @@
-import { RedisModule, RedisService } from '@liaoliaots/nestjs-redis';
+import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,7 +7,6 @@ import { AppService } from './app.service';
 import { UserModule } from './feature/user/user.module';
 import { AuthModule } from './feature/auth/auth.module';
 import { ChatModule } from './feature/chat/chat.module';
-import { EventGateway } from './feature/event/event.gateway';
 import { EventModule } from './feature/event/event.module';
 
 @Module({
@@ -18,12 +17,13 @@ import { EventModule } from './feature/event/event.module';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: 'mysql',
+        type: 'postgres',
         host: config.get('DB_HOST'),
         port: config.get('DB_PORT'),
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_DATABASE'),
+        schema: config.get('DB_SCHEMA'),
         autoLoadEntities: true,
         synchronize: true,
       }),
