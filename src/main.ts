@@ -5,6 +5,7 @@ import { EventAdapter } from './feature/event/event.adapter';
 import * as ConnectRedis from 'connect-redis';
 import * as ExpressSession from 'express-session';
 import { ConfigService } from '@nestjs/config';
+import { urlencoded, json } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,6 +20,8 @@ async function bootstrap() {
     saveUninitialized: false,
   });
   app.use(expressSession);
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
   app.useWebSocketAdapter(new EventAdapter(app, expressSession));
 
   app.enableCors({ credentials: true, origin: 'http://localhost:8080' });
